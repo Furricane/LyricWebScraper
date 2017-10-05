@@ -9,7 +9,6 @@ import json
 from bs4 import BeautifulSoup
 sys.path.append('C:\PythonProjects\PythonUtilities')
 import CFGFileHelper
-import CSVFileHelper
 
 cfgpath = 'C:\PythonProjects\Private\lyricgeniuscredentials.ini'
 credentialdict = CFGFileHelper.read(cfgpath,'credentials')
@@ -43,21 +42,21 @@ def lyrics_from_song_api_path(song_api_path):
   return lyrics
 
 
-def pull_lyrics():
-    outfile = CSVFileHelper.CSVFile(".",filename,True)
-    nextpage = 1
-    while nextpage != None:
-        print("Downloading page "+str(nextpage))
-        url = base_url + "/artists/"+artist_id+ "/songs?per_page=50&page="+str(nextpage)
-        response = requests.get(url, headers=headers)
-        json = response.json()
 
-        nextpage = json["response"]["next_page"]
-        for song in json["response"]["songs"]:
-            print(song["title"])
-            song_api_path = song["api_path"]
-            lyrics = lyrics_from_song_api_path(song_api_path)
-            outfile.WriteRow(lyrics)
+def pull_lyrics():
+    with open(filename, "w", encoding="utf-8") as outfile:
+        nextpage = 1
+        while nextpage != None:
+            print("Downloading page "+str(nextpage))
+            url = base_url + "/artists/"+artist_id+ "/songs?per_page=50&page="+str(nextpage)
+            response = requests.get(url, headers=headers)
+            json = response.json()
+            nextpage = json["response"]["next_page"]
+            for song in json["response"]["songs"]:
+                print(song["title"]+" by "+song["primary_artist"]["name"])
+                song_api_path = song["api_path"]
+                lyrics = lyrics_from_song_api_path(song_api_path)
+                outfile.write(lyrics)
     outfile.Close()
 
 if __name__ == "__main__":
